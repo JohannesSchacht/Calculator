@@ -8,6 +8,10 @@
     "start": "npm run compile && electron ./bin",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
+  "prettier": {
+    "tabWidth": 4,
+    "useTabs": true
+  },
   "keywords": [],
   "author": "",
   "license": "ISC",

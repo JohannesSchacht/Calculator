@@ -3,7 +3,11 @@
   "extends": ["tslint:recommended"],
   "jsRules": {},
   "rules": {
-    "no-console": [false, "warning"]
+    "no-console": [false, "warning"],
+    "import-spacing": true,
+    "indent": {
+      "options": ["tabs"]
+    }
   },
   "rulesDirectory": []
 }
