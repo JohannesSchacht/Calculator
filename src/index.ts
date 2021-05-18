@@ -1,6 +1,6 @@
 import { app, BrowserWindow } from "electron";
 import * as path from "path";
-import { MyCalculator } from "./application";
+import { myCalculator } from "./application";
 
 let mainWindow: BrowserWindow;
 
@@ -16,6 +16,7 @@ function createWindow() {
 
 	// and load the index.html of the app.
 	mainWindow.loadFile(path.join(__dirname, "index.html"));
+	const x = myCalculator;
 
 	// Open the DevTools.
 	// mainWindow.webContents.openDevTools();

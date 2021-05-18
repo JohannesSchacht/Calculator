@@ -1,13 +1,14 @@
 {
-  "defaultSeverity": "error",
-  "extends": ["tslint:recommended"],
-  "jsRules": {},
-  "rules": {
-    "no-console": [false, "warning"],
-    "import-spacing": true,
-    "indent": {
-      "options": ["tabs"]
-    }
-  },
-  "rulesDirectory": []
+	"defaultSeverity": "error",
+	"extends": ["tslint:recommended"],
+	"jsRules": {},
+	"rules": {
+		"no-console": [false, "warning"],
+		"max-classes-per-file": false,
+		"import-spacing": true,
+		"indent": {
+			"options": ["tabs"]
+		}
+	},
+	"rulesDirectory": []
 }
