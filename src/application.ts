@@ -1,9 +1,11 @@
 import { fromEvent } from "rxjs";
-import { tap } from "rxjs/operators";
+import { state } from "./state/state";
+import * as actions from "./state/actions";
 
 export class MyCalculator {
 	private document: Document | undefined;
-	private state: State | undefined;
+	private viewModel: ViewModel | undefined;
+
 	private op1: HTMLInputElement | undefined;
 	private op2: HTMLInputElement | undefined;
 	private operation: HTMLSelectElement | undefined;
@@ -11,29 +13,33 @@ export class MyCalculator {
 
 	public initialize(document: Document) {
 		this.document = document;
-		this.state = new State(document);
+		this.viewModel = new ViewModel(document);
 
+		// Get input elements (upper half)
 		this.op1 = this.getInputElement("field1");
 		this.op2 = this.getInputElement("field2");
 		this.operation = this.getSelectElement("operation");
-		this.result = this.getElement("result");
+		this.result = this.getElement("result"); // just for testing
 
-		fromEvent(this.op1, "input").subscribe(
-			() => (this.state!.op1 = parseInt(this.op1!.value, 10))
+		// Add event handlers to input elements -> store in state
+		fromEvent(this.op1, "input").subscribe(() =>
+			state.dispatch(actions.setOp1(parseInt(this.op1!.value, 10)))
 		);
-		fromEvent(this.op2, "input").subscribe(
-			() => (this.state!.op2 = parseInt(this.op2!.value, 10))
+		fromEvent(this.op2, "input").subscribe(() =>
+			state.dispatch(actions.setOp2(parseInt(this.op2!.value, 10)))
 		);
 		fromEvent(this.operation, "input").subscribe(() => {
-			this.state!.operation = this.operation!.options[
+			const op: Operation = this.operation!.options[
 				this.operation!.selectedIndex
 			].text as Operation;
+			state.dispatch(actions.setOperation(op));
 		});
 		fromEvent(this.getElement("calculate"), "click").subscribe(() =>
-			this.state!.calculate()
+			state.dispatch(actions.calculate(0))
 		);
 
-		this.result.innerHTML = "Result";
+		// Initialize input elements with values
+		this.result.innerHTML = "See result below";
 
 		this.op1.value = "0";
 		this.op2.value = "0";
@@ -47,7 +53,14 @@ export class MyCalculator {
 		this.op2.dispatchEvent(event);
 		this.operation.dispatchEvent(event);
 
-		this.state.calculate();
+		// Start watching state and initialize it
+		state.subscribe(() => {
+			this.viewModel?.updateView();
+		});
+		state.dispatch(actions.setOp1(0));
+		state.dispatch(actions.setOp2(0));
+		state.dispatch(actions.setOperation("+"));
+		state.dispatch(actions.calculate(0));
 	}
 
 	public getElement(id: string): HTMLElement {
@@ -73,9 +86,9 @@ export class MyCalculator {
 	}
 }
 
-type Operation = "+" | "-" | "*" | "/";
+export type Operation = "+" | "-" | "*" | "/";
 
-class State {
+class ViewModel {
 	private document: Document | undefined;
 	private _op1: number = 0;
 	private _op2: number = 0;
@@ -95,55 +108,13 @@ class State {
 		this.resultElem = this.getElement("result1");
 	}
 
-	public get op1() {
-		return this._op1;
-	}
-	public set op1(val: number) {
-		this._op1 = val;
-		this.op1Elem!.innerHTML = val.toString();
-	}
+	public updateView() {
+		const curr = state.getState();
 
-	public get op2() {
-		return this._op2;
-	}
-	public set op2(val: number) {
-		this._op2 = val;
-		this.op2Elem!.innerHTML = val.toString();
-	}
-
-	public get operation() {
-		return this._operation;
-	}
-	public set operation(val: Operation) {
-		this._operation = val;
-		this.operationElem!.innerHTML = val;
-	}
-
-	public get result() {
-		return this._result;
-	}
-	public set result(val: number) {
-		this._result = val;
-		this.resultElem!.innerHTML = val.toString();
-	}
-
-	public calculate() {
-		let res: number = 0;
-		switch (this.operation) {
-			case "+":
-				res = this._op1 + this._op2;
-				break;
-			case "-":
-				res = this._op1 - this._op2;
-				break;
-			case "*":
-				res = this._op1 * this._op2;
-				break;
-			case "/":
-				res = this._op1 / this._op2;
-				break;
-		}
-		this.resultElem!.innerHTML = res.toString();
+		this.op1Elem!.innerHTML = state.getState().op1.toString();
+		this.op2Elem!.innerHTML = state.getState().op2.toString();
+		this.operationElem!.innerHTML = state.getState().operation;
+		this.resultElem!.innerHTML = state.getState().result.toString();
 	}
 
 	private getElement(id: string): HTMLElement {
