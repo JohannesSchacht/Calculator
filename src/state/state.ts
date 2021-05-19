@@ -1,36 +1,42 @@
 import { createStore, Action } from "redux";
 import * as actions from "./actions";
 import { Operation } from "../application";
+import { produce } from "immer";
 
-const defaultStore = { op1: 0, op2: 0, operation: "+", result: 0 };
+type State = {
+	op1: number;
+	op2: number;
+	operation: Operation;
+	result: number;
+};
+const defaultState: State = { op1: 0, op2: 0, operation: "+", result: 0 };
 
-// tslint:disable-next-line: no-shadowed-variable
-function reducer(state = defaultStore, action: { type: string; payload: any }) {
+function reducer(
+	// tslint:disable-next-line: no-shadowed-variable
+	state: State = defaultState,
+	action: { type: string; payload: any }
+) {
 	switch (action.type) {
 		case actions.SET_OP1:
-			return {
-				...state,
-				op1: action.payload as number,
-			};
+			return produce(state, (draft) => {
+				draft.op1 = action.payload;
+			});
 		case actions.SET_OP2:
-			return {
-				...state,
-				op2: action.payload as number,
-			};
+			return produce(state, (draft) => {
+				draft.op2 = action.payload;
+			});
 		case actions.SET_OPERATION:
-			return {
-				...state,
-				operation: action.payload as Operation,
-			};
+			return produce(state, (draft) => {
+				draft.operation = action.payload;
+			});
 		case actions.CALCULATE:
-			return {
-				...state,
-				result: calculate(
+			return produce(state, (draft) => {
+				draft.result = calculate(
 					state.op1,
 					state.op2,
 					state.operation as Operation
-				),
-			};
+				);
+			});
 		default:
 			return state;
 	}
